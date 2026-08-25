@@ -1,5 +1,5 @@
 {
-  "name": "@mycep/sdk",
+  "name": "@model5/mycep-sdk",
   "version": "0.1.0",
   "type": "module",
   "description": "Cliente oficial da API MyCEP — consulta de CEP e endereços do Brasil, autocomplete, geocoding reverso e validadores.",

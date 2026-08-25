@@ -1,13 +1,13 @@
-# `@mycep/sdk`
+# `@model5/mycep-sdk`
 
 Cliente TypeScript da [API MyCEP](https://www.mycep.app.br).
 
 ```bash
-npm install @mycep/sdk
+npm install @model5/mycep-sdk
 ```
 
 ```ts
-import { MyCepClient } from '@mycep/sdk'
+import { MyCepClient } from '@model5/mycep-sdk'
 
 const mycep = new MyCepClient({ apiKey: process.env.MYCEP_API_KEY })
 
@@ -19,7 +19,7 @@ const proximo = await mycep.reverse(-23.5505, -46.6333)    // Business+
 Validadores locais, sem rede e sem consumir cota:
 
 ```ts
-import { isValidCpf, isValidCnpj, classifyPixKey } from '@mycep/sdk/validators'
+import { isValidCpf, isValidCnpj, classifyPixKey } from '@model5/mycep-sdk/validators'
 ```
 
 São os mesmos algoritmos que a API roda no servidor — formato e dígitos verificadores.
@@ -28,7 +28,7 @@ Não afirmam que o número está emitido.
 ## Erros
 
 ```ts
-import { MyCepError } from '@mycep/sdk'
+import { MyCepError } from '@model5/mycep-sdk'
 
 try {
   await mycep.reverse(lat, lng)

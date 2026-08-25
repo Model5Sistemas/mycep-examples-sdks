@@ -1,4 +1,4 @@
-name: Publicar @mycep/sdk no npm
+name: Publicar @model5/mycep-sdk no npm
 
 # Dispara na Release do GitHub. Falha fechado: sem NPM_TOKEN configurado nos
 # secrets do repositório, o job encerra sem publicar em vez de tentar e

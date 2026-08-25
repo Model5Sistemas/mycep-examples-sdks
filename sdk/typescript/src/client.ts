@@ -86,7 +86,7 @@ export class MyCepClient {
 
   /**
    * Server-side validation, metered as one request. For a purely local check
-   * with no network call, use the functions in `@mycep/sdk/validators`.
+   * with no network call, use the functions in `@model5/mycep-sdk/validators`.
    */
   async validate(kind: MyCepValidation['kind'], value: string): Promise<MyCepValidation> {
     const params = new URLSearchParams({ valor: value })

@@ -73,7 +73,7 @@ ambiente — não um trecho solto que quebra na primeira exceção.
 ### TypeScript, com o SDK
 
 ```ts
-import { MyCepClient } from '@mycep/sdk'
+import { MyCepClient } from '@model5/mycep-sdk'
 
 const mycep = new MyCepClient({ apiKey: process.env.MYCEP_API_KEY })
 
