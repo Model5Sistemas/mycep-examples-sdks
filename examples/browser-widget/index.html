@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyCEP — preenchimento de endereço no checkout</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 520px; margin: 40px auto; padding: 0 16px; }
+      label { display: block; margin-top: 12px; font-size: 14px; font-weight: 600; }
+      input { width: 100%; padding: 9px 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; }
+      .linha { display: flex; gap: 12px; }
+      .linha > div { flex: 1; }
+      #status { min-height: 20px; margin-top: 10px; font-size: 13px; color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <h1>Endereço de entrega</h1>
+    <p>Digite o CEP — o resto é preenchido sozinho.</p>
+
+    <form>
+      <label for="cep">CEP</label>
+      <input id="cep" name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="01001-000" />
+      <div id="status" role="status" aria-live="polite"></div>
+
+      <label for="logradouro">Logradouro</label>
+      <input id="logradouro" name="logradouro" autocomplete="address-line1" />
+
+      <label for="bairro">Bairro</label>
+      <input id="bairro" name="bairro" autocomplete="address-level3" />
+
+      <div class="linha">
+        <div>
+          <label for="cidade">Cidade</label>
+          <input id="cidade" name="cidade" autocomplete="address-level2" />
+        </div>
+        <div style="max-width: 90px">
+          <label for="uf">UF</label>
+          <input id="uf" name="uf" maxlength="2" autocomplete="address-level1" />
+        </div>
+      </div>
+    </form>
+
+    <!--
+      A chave fica visível no HTML: isso é esperado e não é falha.
+      Restrinja-a por ORIGEM na sua conta (Chaves de API → Origens permitidas)
+      e ela só responde a requisições vindas dos seus domínios.
+      Uma chave SEM restrição de origem pertence ao seu backend, não a esta página.
+    -->
+    <script
+      src="https://api.mycep.app.br/widget.js"
+      data-mycep-key="cep_live_sua_chave_restrita_por_origem"
+      data-mycep-cep="#cep"
+      data-mycep-logradouro="#logradouro"
+      data-mycep-bairro="#bairro"
+      data-mycep-cidade="#cidade"
+      data-mycep-uf="#uf"
+      data-mycep-status="#status"
+    ></script>
+
+    <script>
+      // O widget emite eventos — útil para métrica de conversão ou para
+      // avançar o foco no formulário.
+      document.addEventListener('mycep:filled', (evento) => {
+        console.log('endereço preenchido', evento.detail)
+        document.querySelector('#logradouro').focus()
+      })
+      document.addEventListener('mycep:error', () => {
+        console.warn('não foi possível buscar o CEP')
+      })
+    </script>
+  </body>
+</html>

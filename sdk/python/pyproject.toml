@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mycep"
+version = "0.1.0"
+description = "Cliente oficial da API MyCEP — consulta de CEP e endereços do Brasil."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Model5 Sistemas" }]
+keywords = ["cep", "correios", "endereco", "brasil", "api", "ibge", "viacep"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Natural Language :: Portuguese (Brazilian)",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = ["requests>=2.28"]
+
+[project.urls]
+Homepage = "https://www.mycep.app.br"
+Documentation = "https://www.mycep.app.br/docs"
+Source = "https://github.com/Model5Sistemas/mycep-examples-sdks"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mycep"]

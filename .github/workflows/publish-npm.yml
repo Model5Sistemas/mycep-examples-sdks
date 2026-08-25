@@ -1,0 +1,58 @@
+name: Publicar @mycep/sdk no npm
+
+# Dispara na Release do GitHub. Falha fechado: sem NPM_TOKEN configurado nos
+# secrets do repositório, o job encerra sem publicar em vez de tentar e
+# expor erro. A versão publicada é a do package.json — a tag só dispara.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Só empacotar, sem publicar'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write # provenance do npm
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Confirma que o token existe
+        id: guarda
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo 'NPM_TOKEN ausente — nada será publicado.'
+            echo 'pode_publicar=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'pode_publicar=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build
+        working-directory: sdk/typescript
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Confere o conteúdo do pacote
+        working-directory: sdk/typescript
+        run: |
+          npm pack --dry-run
+          # dist/ precisa existir: publicar só o package.json quebra quem instala.
+          test -f dist/index.js || { echo 'build não gerou dist/'; exit 1; }
+
+      - name: Publicar
+        if: steps.guarda.outputs.pode_publicar == 'true' && github.event_name == 'release'
+        working-directory: sdk/typescript
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

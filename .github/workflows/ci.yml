@@ -1,0 +1,135 @@
+name: CI
+
+# Compila e valida todo exemplo, em toda linguagem. Existe porque um bug de
+# sintaxe num exemplo público custa mais que num teste interno: quem copia
+# não sabe que o erro é nosso.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typescript:
+    name: TypeScript (SDK + exemplo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build do SDK
+        working-directory: sdk/typescript
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Typecheck do exemplo
+        working-directory: examples/typescript
+        run: |
+          npm install --no-save typescript@^5.6
+          npx tsc --noEmit --target es2022 --module esnext --moduleResolution bundler \
+            --lib es2022,dom --strict --types node consulta.ts || \
+          npx tsc --noEmit --target es2022 --module esnext --moduleResolution bundler \
+            --lib es2022,dom --strict consulta.ts
+
+  python:
+    name: Python (SDK + exemplo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests pytest ruff
+      - name: Lint
+        run: ruff check sdk/python examples/python
+      - name: Testes do SDK (validadores são puros — rodam sem rede)
+        run: PYTHONPATH=sdk/python/src pytest sdk/python/tests -q
+      - name: Compila o exemplo
+        run: python -m py_compile examples/python/consulta.py
+
+  php:
+    name: PHP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, json
+      - run: php -l examples/php/consulta.php
+
+  go:
+    name: Go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Verifica formatação e compila
+        working-directory: examples/go
+        run: |
+          test -z "$(gofmt -l .)" || { echo 'gofmt: arquivos fora do padrão'; gofmt -l .; exit 1; }
+          go mod init mycep-example 2>/dev/null || true
+          go vet ./...
+          go build ./...
+
+  java:
+    name: Java
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: javac -d /tmp/java-out examples/java/MyCep.java
+
+  csharp:
+    name: C# / .NET
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet build examples/csharp/MyCep.csproj --nologo
+
+  ruby:
+    name: Ruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - run: ruby -c examples/rails/my_cep.rb
+
+  shell:
+    name: Shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y shellcheck
+          shellcheck examples/curl/consulta.sh
+
+  segredos:
+    name: Nenhuma chave real no repositório
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Procura credencial que tenha escapado para um exemplo
+        run: |
+          # Exclui .github/: é aqui que os próprios padrões de busca vivem,
+          # senão o check acusa a si mesmo.
+          EXCL="--exclude-dir=.git --exclude-dir=.github --exclude-dir=node_modules"
+          # Chave real tem 64 hex depois do prefixo; o placeholder não.
+          ! grep -rInE $EXCL 'cep_(live|test)_[0-9a-f]{32}' . || exit 1
+          ! grep -rInE $EXCL 'sk_(live|test|org)_[A-Za-z0-9]{16}' . || exit 1
+          ! grep -rIn $EXCL 'whsec_' . || exit 1
+          echo 'nenhuma credencial encontrada'
