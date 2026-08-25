@@ -29,11 +29,8 @@ jobs:
       - name: Typecheck do exemplo
         working-directory: examples/typescript
         run: |
-          npm install --no-save typescript@^5.6
-          npx tsc --noEmit --target es2022 --module esnext --moduleResolution bundler \
-            --lib es2022,dom --strict --types node consulta.ts || \
-          npx tsc --noEmit --target es2022 --module esnext --moduleResolution bundler \
-            --lib es2022,dom --strict consulta.ts
+          npm install --no-audit --no-fund
+          npm run typecheck
 
   python:
     name: Python (SDK + exemplo)
